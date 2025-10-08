@@ -175,7 +175,7 @@ export default function Products() {
           {/* Button container */}
           <div className="flex justify-center items-center space-x-3">
             <a
-              href="/Jatayu_India_Winter_Catalogue.pdf"
+              href="/public/Jatayu_India_Winter_Catalogue.pdf"
               download="Jatayu_Catalogue.pdf"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full text-white font-semibold hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300"

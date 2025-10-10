@@ -88,7 +88,7 @@ export default function Signup() {
       if (signUpError) throw signUpError;
 
       if (data.user) {
-       alert("Verification Link has been sent to your email. Verify your email before login.")
+        alert("Verification Link has been sent to your email. Verify your email before login.");
         navigate("/dashboard");
       }
     } catch (err: any) {

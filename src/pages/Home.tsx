@@ -1,21 +1,40 @@
 import Spline from '@splinetool/react-spline';
-import { ArrowRight, Shield, Zap, Globe } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { ArrowRight, Shield, Zap, Globe } from "lucide-react";
+import { Link } from "react-router-dom";
+import { supabase } from "../lib/supabase"; // make sure this path is correct
 
 export default function Home() {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data?.user);
+    };
+    fetchUser();
+
+    // Listen for login/logout changes
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       <div className="absolute inset-0 z-0">
-        { 
-          <Spline scene="https://prod.spline.design/jvvPagGI-cSdA0fZ/scene.splinecode" /> 
-        }
+        <Spline scene="https://prod.spline.design/jvvPagGI-cSdA0fZ/scene.splinecode" />
       </div>
 
       <div className="relative z-10 min-h-screen flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
           <div className="text-center space-y-8">
             <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight">
-             
               <span className="block bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">
                 Jatayu India
               </span>
@@ -26,13 +45,16 @@ export default function Home() {
             </p>
 
             <div className="flex flex-wrap justify-center gap-4 pt-8">
-              <Link
-                to="/login"
-                className="group px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full text-white font-semibold hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 flex items-center gap-2"
-              >
-                Login
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
+              {/* 👇 Only show Login if user is not logged in */}
+              {!user && (
+                <Link
+                  to="/login"
+                  className="group px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full text-white font-semibold hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 flex items-center gap-2"
+                >
+                  Login
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              )}
 
               <Link
                 to="/enquiry"
@@ -66,16 +88,22 @@ export default function Home() {
   );
 }
 
-function ServiceCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+function ServiceCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
   return (
     <div className="group relative bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-lg border border-white/10 rounded-2xl p-8 hover:scale-105 hover:border-cyan-500/50 transition-all duration-300 cursor-pointer">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-cyan-500/0 group-hover:from-blue-500/10 group-hover:to-cyan-500/10 rounded-2xl transition-all duration-300" />
-
       <div className="relative z-10">
         <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-300">
           {icon}
         </div>
-
         <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
         <p className="text-gray-400">{description}</p>
       </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   UserPlus,
@@ -10,7 +10,7 @@ import {
   EyeOff,
   ExternalLink,
 } from "lucide-react";
-import {supabase} from '../lib/supabase'
+import { supabase } from "../lib/supabase";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -27,25 +27,48 @@ export default function Signup() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) {
+        navigate("/"); // redirect to home if logged in
+      }
+    };
+    checkUser();
+
+    // Listen for auth state changes (e.g., user logs in/out elsewhere)
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session?.user) {
+          navigate("/");
+        }
+      }
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, [navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError('');
+    setError("");
 
     if (!acceptedTerms) {
-      setError('Please accept the Terms & Conditions to continue');
+      setError("Please accept the Terms & Conditions to continue");
       setIsSubmitting(false);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       setIsSubmitting(false);
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError("Password must be at least 6 characters long");
       setIsSubmitting(false);
       return;
     }
@@ -65,10 +88,10 @@ export default function Signup() {
       if (signUpError) throw signUpError;
 
       if (data.user) {
-        navigate('/dashboard');
+        navigate("/dashboard");
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to create account. Please try again.');
+      setError(err.message || "Failed to create account. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
